@@ -1,5 +1,5 @@
 /**
- * Redux middleware for calling an sails socket
+ * Redux middleware for calling an sails socket.
  * @module redux-sails-socket-middleware
  * @requires socket.io-client
  * @requires sails.io.js
