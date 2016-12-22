@@ -1,5 +1,6 @@
 import socketIOClient from 'socket.io-client';
 import sailsIOClient from 'sails.io.js';
+import merge from 'lodash.merge';
 import CALL_SOCKET from './CALL_SOCKET';
 import LISTEN_SOCKET from './LISTEN_SOCKET';
 import { isRSAA, validateRSAA } from './validation';
@@ -83,7 +84,7 @@ function sailsSocketMiddleware(options = {}) {
           socket.socket.on(on, (message) => {
             actionWith(
               listenType,
-              [action, getState(), message]
+              [action, getState(), merge({}, { on }, { message })]
             ).then((listenAction) => dispatch(listenAction));
           });
         }
@@ -158,7 +159,7 @@ function sailsSocketMiddleware(options = {}) {
         if (!res.error) {
           return next(await actionWith(
             successType,
-            [action, getState(), res]
+            [action, getState(), merge({}, { endpoint }, res)]
           ));
         } else {
           return next(await actionWith(
@@ -166,7 +167,7 @@ function sailsSocketMiddleware(options = {}) {
               ...failureType,
               error: true
             },
-            [action, getState(), res]
+            [action, getState(), merge({}, { endpoint }, res)]
           ));
         }
       }

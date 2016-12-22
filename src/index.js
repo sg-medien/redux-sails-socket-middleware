@@ -3,6 +3,7 @@
  * @module redux-sails-socket-middleware
  * @requires babel-runtime
  * @requires lodash.isplainobject
+ * @requires lodash.merge
  * @requires sails.io.js
  * @requires socket.io-client
  * @exports {symbol} CALL_SOCKET
