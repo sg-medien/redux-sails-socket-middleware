@@ -1,15 +1,16 @@
 {
-  "name":"redux-sails-socket-middleware",
-  "version":"0.0.1",
-  "description":"Redux middleware for calling an sails socket.",
-  "author":{
-    "name":"Sebastian Galler",
-    "email":"sg@sg-medien.com"
+  "name": "redux-sails-socket-middleware",
+  "version": "0.2.9",
+  "description": "Redux middleware for calling an sails socket.",
+  "author": {
+    "name": "Sebastian Galler",
+    "email": "sg@sg-medien.com"
   },
-  "bugs":"https://github.com/sg-medien/redux-sails-socket-middleware/issues",
-  "contributors":[],
+  "bugs": "https://github.com/sg-medien/redux-sails-socket-middleware/issues",
+  "contributors": [],
   "dependencies": {
     "babel-runtime": "^5.8.25",
+    "lodash.isplainobject": "^4.0.6",
     "sails.io.js": "^1.1.4",
     "socket.io-client": "^1.7.2"
   },
@@ -26,11 +27,11 @@
     "tap-spec": "^4.1.0",
     "tape": "^4.2.1"
   },
-  "engines":{
-    "node":">= 4.0.0"
+  "engines": {
+    "node": ">= 4.0.0"
   },
-  "homepage":"https://github.com/sg-medien/redux-sails-socket-middleware",
-  "keywords":[
+  "homepage": "https://github.com/sg-medien/redux-sails-socket-middleware",
+  "keywords": [
     "sails",
     "redux",
     "socket",
@@ -38,19 +39,17 @@
     "redux-middleware",
     "flux"
   ],
-  "license":"MIT",
-  "main":"lib/index.js",
-  "repository":{
-    "type":"git",
-    "url":"git://github.com/sg-medien/redux-sails-socket-middleware.git"
+  "license": "MIT",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sg-medien/redux-sails-socket-middleware.git"
   },
   "scripts": {
     "build": "babel src --out-dir lib",
     "clean": "rimraf lib coverage",
-    "cover": "babel-node ./node_modules/.bin/babel-istanbul cover test/index.js | tap-spec",
     "lint": "eslint src test",
-    "prepublish": "npm run lint && npm test && npm run clean && npm run build",
-    "test": "babel-node test/index.js | tap-spec"
+    "prepublish": "npm run lint && npm run clean && npm run build"
   },
   "files": [
     "README.md",

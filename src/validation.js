@@ -1,8 +1,9 @@
 import CALL_SOCKET from './CALL_SOCKET';
+import LISTEN_SOCKET from './LISTEN_SOCKET';
 import isPlainObject from 'lodash.isplainobject';
 
 /**
- * Is the given action a plain JavaScript object with a [CALL_SOCKET] property?
+ * Is the given action a plain JavaScript object with a [CALL_SOCKET] or a [LISTEN_SOCKET] property?
  *
  * @function isRSAA
  * @access public
@@ -10,7 +11,7 @@ import isPlainObject from 'lodash.isplainobject';
  * @returns {boolean}
  */
 function isRSAA(action) {
-  return isPlainObject(action) && action.hasOwnProperty(CALL_SOCKET);
+  return isPlainObject(action) && (action.hasOwnProperty(CALL_SOCKET) || action.hasOwnProperty(LISTEN_SOCKET));
 }
 
 /**
@@ -56,77 +57,108 @@ function isValidTypeDescriptor(obj) {
  */
 function validateRSAA(action) {
   let validationErrors = [];
-  const validCallSocketKeys = [
-    'endpoint',
-    'method',
-    'body',
-    'headers',
-    'types'
-  ];
-  const validMethods = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE'
-  ];
 
   if (!isRSAA(action)) {
-    validationErrors.push('RSAAs must be plain JavaScript objects with a [CALL_SOCKET] property');
+    validationErrors.push('RSAAs must be plain JavaScript objects with a [CALL_SOCKET] or a [LISTEN_SOCKET] property');
     return validationErrors;
   }
 
   for (let key in action) {
-    if (key !== [CALL_SOCKET]) {
+    if (key !== [CALL_SOCKET] && key !== [LISTEN_SOCKET]) {
       validationErrors.push(`Invalid root key: ${key}`);
     }
   }
 
-  const callSocket = action[CALL_SOCKET];
-  if (!isPlainObject(callSocket)) {
-    validationErrors.push('[CALL_SOCKET] property must be a plain JavaScript object');
-  }
-  for (let key in callSocket) {
-    if (!~validCallSocketKeys.indexOf(key)) {
-      validationErrors.push(`Invalid [CALL_SOCKET] key: ${key}`);
+  if (action.hasOwnProperty(CALL_SOCKET)) {
+    const validCallSocketKeys = [
+      'endpoint',
+      'method',
+      'body',
+      'headers',
+      'types'
+    ];
+    const validMethods = [
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE'
+    ];
+
+    const callSocket = action[CALL_SOCKET];
+    if (!isPlainObject(callSocket)) {
+      validationErrors.push('[CALL_SOCKET] property must be a plain JavaScript object');
     }
-  }
+    for (let key in callSocket) {
+      if (!~validCallSocketKeys.indexOf(key)) {
+        validationErrors.push(`Invalid [CALL_SOCKET] key: ${key}`);
+      }
+    }
 
-  const { endpoint, method, headers, types } = callSocket;
+    const { endpoint, method, headers, types } = callSocket;
 
-  if (typeof endpoint === 'undefined') {
-    validationErrors.push('[CALL_SOCKET] must have an endpoint property');
-  } else if (typeof endpoint !== 'string' && typeof endpoint !== 'function') {
-    validationErrors.push('[CALL_SOCKET].endpoint property must be a string or a function');
-  }
+    if (typeof endpoint === 'undefined') {
+      validationErrors.push('[CALL_SOCKET] must have an endpoint property');
+    } else if (typeof endpoint !== 'string' && typeof endpoint !== 'function') {
+      validationErrors.push('[CALL_SOCKET].endpoint property must be a string or a function');
+    }
 
-  if (typeof method === 'undefined') {
-    validationErrors.push('[CALL_SOCKET] must have a method property');
-  } else if (typeof method !== 'string') {
-    validationErrors.push('[CALL_SOCKET].method property must be a string');
-  } else if (!~validMethods.indexOf(method.toUpperCase())) {
-    validationErrors.push(`Invalid [CALL_SOCKET].method: ${method.toUpperCase()}`);
-  }
+    if (typeof method === 'undefined') {
+      validationErrors.push('[CALL_SOCKET] must have a method property');
+    } else if (typeof method !== 'string') {
+      validationErrors.push('[CALL_SOCKET].method property must be a string');
+    } else if (!~validMethods.indexOf(method.toUpperCase())) {
+      validationErrors.push(`Invalid [CALL_SOCKET].method: ${method.toUpperCase()}`);
+    }
 
-  if (typeof headers !== 'undefined' && !isPlainObject(headers) && typeof headers !== 'function') {
-    validationErrors.push('[CALL_SOCKET].headers property must be undefined, a plain JavaScript object, or a function');
-  }
+    if (typeof headers !== 'undefined' && !isPlainObject(headers) && typeof headers !== 'function') {
+      validationErrors.push('[CALL_SOCKET].headers property must be undefined, a plain JavaScript object, or a function');
+    }
 
-
-  if (typeof types === 'undefined') {
-    validationErrors.push('[CALL_SOCKET] must have a types property');
-  } else if (!Array.isArray(types) || types.length !== 3) {
-    validationErrors.push('[CALL_SOCKET].types property must be an array of length 3');
+    if (typeof types === 'undefined') {
+      validationErrors.push('[CALL_SOCKET] must have a types property');
+    } else if (!Array.isArray(types) || types.length !== 3) {
+      validationErrors.push('[CALL_SOCKET].types property must be an array of length 3');
+    } else {
+      const [requestType, successType, failureType] = types;
+      if (typeof requestType !== 'string' && typeof requestType !== 'symbol' && !isValidTypeDescriptor(requestType)) {
+        validationErrors.push('Invalid request type');
+      }
+      if (typeof successType !== 'string' && typeof successType !== 'symbol' && !isValidTypeDescriptor(successType)) {
+        validationErrors.push('Invalid success type');
+      }
+      if (typeof failureType !== 'string' && typeof failureType !== 'symbol' && !isValidTypeDescriptor(failureType)) {
+        validationErrors.push('Invalid failure type');
+      }
+    }
   } else {
-    const [requestType, successType, failureType] = types;
-    if (typeof requestType !== 'string' && typeof requestType !== 'symbol' && !isValidTypeDescriptor(requestType)) {
-      validationErrors.push('Invalid request type');
+    const validListenSocketKeys = [
+      'on',
+      'type'
+    ];
+
+    const listenSocket = action[LISTEN_SOCKET];
+    if (!isPlainObject(listenSocket)) {
+      validationErrors.push('[LISTEN_SOCKET] property must be a plain JavaScript object');
     }
-    if (typeof successType !== 'string' && typeof successType !== 'symbol' && !isValidTypeDescriptor(successType)) {
-      validationErrors.push('Invalid success type');
+    for (let key in listenSocket) {
+      if (!~validListenSocketKeys.indexOf(key)) {
+        validationErrors.push(`Invalid [LISTEN_SOCKET] key: ${key}`);
+      }
     }
-    if (typeof failureType !== 'string' && typeof failureType !== 'symbol' && !isValidTypeDescriptor(failureType)) {
-      validationErrors.push('Invalid failure type');
+
+    const { on, type } = listenSocket;
+
+    if (typeof on === 'undefined') {
+      validationErrors.push('[LISTEN_SOCKET] must have an on property');
+    } else if (typeof on !== 'string') {
+      validationErrors.push('[LISTEN_SOCKET].on property must be a string');
+    }
+
+    if (typeof type === 'undefined') {
+      validationErrors.push('[LISTEN_SOCKET] must have a type property');
+    } else if (typeof type !== 'string' && typeof type !== 'symbol' && !isValidTypeDescriptor(type)) {
+      validationErrors.push('Invalid listen type');
     }
   }
 

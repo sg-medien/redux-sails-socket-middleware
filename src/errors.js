@@ -61,7 +61,6 @@ class SocketError extends Error {
     this.status = status;
     this.message = message;
     this.response = response;
-
   }
 }
 
