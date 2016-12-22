@@ -1,17 +1,29 @@
 module.exports = {
-  "extends": "airbnb",
-  "plugins": [
-    "jsx-a11y",
-    "import"
-  ],
+  "parser": "babel-eslint",
+  "plugins": ["babel"],
   "env": {
     "browser": true,
-    "node": true
+    "es6": true
+  },
+  "ecmaFeatures": {
+    "experimentalObjectRestSpread": true,
+    "modules": true
   },
   "rules": {
-    "valid-typeof": "off",
-    "no-underscore-dangle": "off",
-    "max-len": [1, 150, 2, { ignoreComments: true }],
-    "no-param-reassign": ["error",{ "props": false }]
+    "babel/arrow-parens": [2, "always"],
+    "no-underscore-dangle": 0,
+    "strict": [2, "global"],
+    "eqeqeq": [2, "smart"],
+    "no-undef": 2,
+    "no-console": 1,
+    "no-nested-ternary": 2,
+    "indent": [2, 2],
+    "quotes": [2, "single"],
+    "brace-style": [2, "1tbs", { "allowSingleLine": true }],
+    "object-curly-spacing": [2, "always"],
+    "eol-last": 2,
+    "padded-blocks": [2, "never"],
+    "space-before-function-paren": [2, { "anonymous": "always", "named": "never" }],
+    "space-before-blocks": [2, "always"]
   }
 };

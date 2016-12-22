@@ -9,11 +9,18 @@ import { InternalError, SocketError } from './errors';
  * @returns {promise|undefined}
  */
 async function getJSON(res) {
-  const contentType = res.headers.get('Content-Type');
+  let contentType;
+  if (res.headers) {
+    Object.keys(res.headers).forEach((key) => {
+      if (key.toLowerCase() === 'content-type') {
+        contentType = res.headers[key];
+      }
+    });
+  }
   const emptyCodes = [204, 205];
 
   if (!~emptyCodes.indexOf(res.statusCode) && contentType && ~contentType.indexOf('json')) {
-    return await res.json();
+    return await res;
   } else {
     return await Promise.resolve();
   }
@@ -23,12 +30,12 @@ async function getJSON(res) {
  * Blow up string or symbol types into full-fledged type descriptors,
  *   and add defaults
  *
- * @function normalizeTypeDescriptors
+ * @function normalizeCallTypeDescriptors
  * @access private
  * @param {array} types - The [CALL_SOCKET].types from a validated RSAA
  * @returns {array}
  */
-function normalizeTypeDescriptors(types) {
+function normalizeCallTypeDescriptors(types) {
   let [requestType, successType, failureType] = types;
 
   if (typeof requestType === 'string' || typeof requestType === 'symbol') {
@@ -55,6 +62,29 @@ function normalizeTypeDescriptors(types) {
   };
 
   return [requestType, successType, failureType];
+}
+
+/**
+ * Blow up string or symbol type into full-fledged type descriptor,
+ *   and add defaults
+ *
+ * @function normalizeListenTypeDescriptor
+ * @access private
+ * @param {string|symbol} type - The [LISTEN_SOCKET].type from a validated RSAA
+ * @returns {array}
+ */
+function normalizeListenTypeDescriptor(type) {
+  let listenType = type;
+
+  if (typeof listenType === 'string' || typeof listenType === 'symbol') {
+    listenType = { type: listenType };
+  }
+  listenType = {
+    payload: (action, state, message) => message,
+    ...listenType
+  };
+
+  return listenType;
 }
 
 /**
@@ -93,4 +123,4 @@ async function actionWith(descriptor, args) {
   return descriptor;
 }
 
-export { getJSON, normalizeTypeDescriptors, actionWith };
+export { getJSON, normalizeCallTypeDescriptors, normalizeListenTypeDescriptor, actionWith };
